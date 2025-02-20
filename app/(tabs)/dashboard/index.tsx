@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, Activit
 import { colors } from '@/src/COMPONENTS/global';
 import { BotãoInicio } from '@/src/COMPONENTS/objects';
 import { useRouter } from 'expo-router';
-import { CandidaturaVaga, handleCandidaturaError, height, Vagas, width } from '@/src/firebase/functions/interfaces';
+import { CandidaturaVaga, handleCandidaturaError, height, Vagas, verification, width } from '@/src/firebase/functions/interfaces';
 import { Feather, FontAwesome6, MaterialIcons } from '@expo/vector-icons';
 import { getVagas } from '@/src/firebase/functions/fuctionsVagas/getVagas';
 import { auth, db } from '@/src/firebase/config';
@@ -29,20 +29,25 @@ const Index = () => {
   }, []);
   
   const handleCandidatura = async (vaga: Vagas) => {
+    const userAuth = verification();
     try {
-      // Validação dos campos necessários
-      if (!vaga.vaga_id || !auth.currentUser?.uid) {
-        throw new Error('Dados da vaga ou usuário incompletos');
+      if (!userAuth.uid || !userAuth.name_conta) {
+        throw new Error('Usuário não está autenticado corretamente');
       }
-      
+
+      if (!vaga.vaga_id || !vaga.uid_criadorVaga || !vaga.name_vaga) {
+        console.error('Dados da vaga:', vaga);
+        throw new Error('Dados da vaga incompletos');
+      }
+
       const candidaturaRef = collection(db, 'candidaturas');
       const novaCandidatura: CandidaturaVaga = {
-        id_candidatura: '', // Will be auto-generated
+        id_candidatura: '', // Será gerado pelo Firestore
         vaga_id: vaga.vaga_id,
-        vaga_name: vaga.vaga_name,
-        candidato_name: auth.currentUser?.displayName || 'Usuário',
-        candidatoId: auth.currentUser?.uid,
-        criadorId: vaga.criadorId,
+        vaga_name: vaga.name_vaga,
+        candidatoId: userAuth.uid,
+        candidato_name: userAuth.name_conta,
+        criadorId: vaga.uid_criadorVaga,
         dataCandidatura: new Date().toISOString(),
         status: 'pendente'
       };
@@ -51,27 +56,42 @@ const Index = () => {
       alert('Candidatura realizada com sucesso!');
     } catch (error) {
       const handledError = handleCandidaturaError(error);
-      console.error(handledError);
-      alert(handledError.message || 'Erro ao realizar candidatura');
+      console.error('Erro na candidatura:', error);
+      alert(error instanceof Error ? error.message : 'Erro ao realizar candidatura');
     }
   };
 
-  const renderItem = ({ item }: {item: Vagas}) => (
-    <View style={stylesVagas.item}>
-      <Text style={stylesVagas.title}>{item.name}</Text>
-      <Text style={stylesVagas.subTitle}> {item.empresa}</Text>
-      <Text style={stylesVagas.text}><Text style={{color: colors.amarelo2}}>Salário:</Text> R$ {item.salario}</Text>
-      <Text style={stylesVagas.text}><Text style={{color: colors.amarelo2}}>Modalidades:</Text> {item.modalidades}</Text>      
-      <Text style={stylesVagas.text}><Text style={{color: colors.amarelo2}}>Contato:</Text> {item.gmail}</Text>
-      <Text style={stylesVagas.text}><Text style={{color: colors.amarelo2}}>localização:</Text> {item.localizacao}</Text>
-      <TouchableOpacity 
-        style={stylesVagas.buttonCandidatar}
-        onPress={() => {handleCandidatura(item)}}      
-      >
-        <Text style={stylesVagas.buttonText}>Candidatar-se</Text>
-      </TouchableOpacity>
-    </View>
-  );
+  const renderItem = ({ item }: {item: Vagas}) => {
+    console.log('Item da lista:', item); // Debug para ver os dados que estão chegando
+    return (
+      <View style={stylesVagas.item}>
+        <Text style={stylesVagas.title}>{item.name_vaga}</Text>
+        <Text style={stylesVagas.subTitle}>{item.empresa}</Text>
+        <View style={stylesVagas.box_mode}>
+            <Text style={stylesVagas.mode}>Salario: R$</Text>
+            <Text style={stylesVagas.mode}>{item.salario}</Text>
+        </View>
+        <View style={stylesVagas.box_mode}>
+            <Text style={stylesVagas.mode}>Modalidades: R$</Text>
+            <Text style={stylesVagas.mode}> {item.modalidades}</Text>
+        </View>    
+        <View style={stylesVagas.box_mode}>
+            <Text style={stylesVagas.mode}>Contato:</Text>
+            <Text style={stylesVagas.mode}>{item.gmail}</Text>
+        </View>
+        <View style={stylesVagas.box_mode}>
+            <Text style={stylesVagas.mode}>Loclização:</Text>
+            <Text style={stylesVagas.mode}> {item.localizacao}</Text>
+        </View>   
+        <TouchableOpacity 
+          style={stylesVagas.buttonCandidatar}
+          onPress={() => handleCandidatura(item)}      
+        >
+          <Text style={stylesVagas.buttonText}>Candidatar-se</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -84,37 +104,46 @@ const Index = () => {
           </View>
         </View>
         
-        <View style={styles.containerBoxs}>
-            //Area de box para setores
+        <View style={styles.containerBoxs}> //Area de box para setores
+            <View style={styles.containerBoxs_Areas}> //Generos de vagas
             <Text style={styles.SubTitle}>Areas de vagas</Text>
             <View style={styles.AreaContainerEmpresas}>
 
-              <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+              <ScrollView  showsVerticalScrollIndicator={false}>
                   <TouchableOpacity style={styles.BoxContainerEmpresas} onPress={
                     //Ao clicar no box, vc envia a função boxSetores um 3 valores para servir na busca da pesquisa q vc clicou
                     () => boxSetores('Vagas-trabalho', 'setor', 'Saude')
                   } >
-                    <MaterialIcons name="health-and-safety" size={27} color={colors.amarelo2} />
+                    <View style={styles.boxImage}>
+                        <MaterialIcons name="health-and-safety" size={27} color={colors.amarelo2} />
+                    </View>
                     <Text style={styles.BoxContainerEmpresas_text}>Saúde</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.BoxContainerEmpresas} onPress={() => boxSetores('Vagas-trabalho', 'setor', 'TI')}  >
-                    <MaterialIcons name="computer" size={27} color={colors.amarelo2} />
+                    <View style={styles.boxImage}>
+                        <MaterialIcons name="computer" size={27} color={colors.amarelo2} />
+                    </View>
                     <Text style={styles.BoxContainerEmpresas_text}>TI</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.BoxContainerEmpresas} onPress={() => boxSetores('Vagas-trabalho', 'setor', 'Engenharia')} >
-                    <FontAwesome6 name="house-chimney" size={22} color={colors.amarelo2} />
+                    <View style={styles.boxImage}>
+                        <FontAwesome6 name="house-chimney" size={22} color={colors.amarelo2} />
+                    </View>
                     <Text style={styles.BoxContainerEmpresas_text}>Engenharia</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.BoxContainerEmpresas} onPress={() => boxSetores('Vagas-trabalho', 'setor', 'Educacao')} >
-                    <Feather name="book" size={24} color={colors.amarelo2} />
+                    <View style={styles.boxImage}>
+                        <Feather name="book" size={24} color={colors.amarelo2} />
+                    </View>
                     <Text style={styles.BoxContainerEmpresas_text}>Educação</Text>
                   </TouchableOpacity>
               </ScrollView>
             </View>
+            </View>
 
             <View style={styles.BoxContainer}>
-              <View style={styles.FlatListBox}>
-                  <Text style={styles.SubTitle}>Vagas na sua região:</Text>
+              <View style={styles.FlatListBox}> //VAGAS DE EMPREGO
+                  <Text style={styles.SubTitle}>Vagas de emprego</Text>
                   {loading ? (
                     <ActivityIndicator size="large" color={colors.amarelo1} />
                   ) : (
@@ -126,13 +155,14 @@ const Index = () => {
                     />
                   )}
               </View>
-              <View style={styles.areaButton}>
+              <View style={styles.areaButton}>  //BOTÃO DE VER MAIS
                   <BotãoInicio onPress={() => CriarVagas('Vagas-trabalho')} > 
                       <Text style={styles.TextButton}>Clique aqui para ver mais</Text>
                   </BotãoInicio>
               </View>
             </View>
-            <View style={styles.BoxContainer}>
+
+            <View style={styles.BoxContainer}> //SEGUNDA PARTE DE VAGAS
               <View style={styles.FlatListBox}>
                   <Text style={styles.SubTitle}>Vagas de relacionadas a tecnologia:</Text>
                   {loading ? (
@@ -152,46 +182,34 @@ const Index = () => {
                   </BotãoInicio>
               </View>
             </View>
-            <View style={styles.BoxContainer}>
-              <View style={styles.FlatListBox}>
-                  <Text style={styles.SubTitle}>Vagas de relacionadas a tecnologia:</Text>
-                  {loading ? (
-                    <ActivityIndicator size="large" color={colors.amarelo1} />
-                  ) : (
-                    <FlatList
-                      data={filteredJobs}
-                      keyExtractor={(item) => item.id}
-                      renderItem={renderItem}
-                      scrollEnabled={false} // Previne conflitos de rolagem com o ScrollView
-                    />
-                  )}
-              </View>
-              <View style={styles.areaButton}>
-                  <BotãoInicio onPress={() => CriarVagas('Vagas-trabalho')} >
-                      <Text style={styles.TextButton}>Clique aqui para ver mais</Text>
-                  </BotãoInicio>
-              </View>
-            </View>
+          
             <View style={styles.fim}></View>
+
         </View>
+
       </ScrollView>
     </View>
-  );;
+  );
 };
+
 export default Index;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.fundo,
+    alignItems: 'center',
   },
   scrollArea: {
     flex: 1,
   },
+
+  //TOP AREA
   AreaTop:{
     width: width * 1,
+    borderBottomLeftRadius: 50,
+    borderBottomRightRadius: 50,
     height: height * 0.21,
-    borderBottomLeftRadius: 90,
     backgroundColor: colors.fundo2,
     alignItems: 'center',
     justifyContent: 'center',
@@ -212,51 +230,68 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: colors.tituloBranco,
   },
+
+  //OUTROS ELEMENTOS
   containerBoxs: {
     padding: 15,
     width: width * 1,
-    maxHeight: height * 3.9,
-    marginTop: 10,
+    alignItems: 'center'
   },
   BoxContainer: {
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
   },
-  FlatListBox: {
-    width: "100%",
-    marginTop: 20,
-    borderRadius: 8,
-    marginBottom: 20 
+  containerBoxs_Areas: {
+    width: '94%',
+    minHeight: 120,
+    backgroundColor: colors.fundo,
+    alignItems: 'center',
   },
   SubTitle: {
-    fontSize: 20,
-    left: 10,
-    marginBottom: 5,
+    fontSize: 25,
+    marginTop: 15,
+    marginBottom: 10,
+    fontWeight: 'bold',
     color: colors.tituloBranco,
   },
   AreaContainerEmpresas: {
     width: "100%",
-    maxHeight: 120,
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 5,
-    justifyContent: "center"
+    minHeight: 270,
+    alignItems: 'center',
+    backgroundColor: colors.cinza,
+    marginTop: 10,
+    borderRadius: 30,
   },
   BoxContainerEmpresas: {
-    width: 100,
-    height: 90,
-    backgroundColor: colors.cinza,
-    borderRadius: 5,
-    marginLeft: 10,
+    width: '100%',
+    height: 70,
+    flexDirection: 'row',
     alignItems: "center",
-    justifyContent: "center"
   },
   BoxContainerEmpresas_text: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.amarelo2
+    fontSize: 22,
+    marginRight: 130,
+    left: 20,
+    color: colors.tituloBranco,
   },
+  boxImage: {
+    width: 50,
+    backgroundColor: colors.fundo,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 50,
+    borderRadius: 100,
+  },
+  FlatListBox: {
+    width: "100%",
+    marginTop: 20,
+    borderRadius: 8,
+    marginBottom: 20,
+    alignItems: 'center'
+  },
+
+  //BOTÃO VER MAIS
   areaButton: {
     width: '100%',
     height: 80,
@@ -277,9 +312,11 @@ const styles = StyleSheet.create({
   }
 });
 
-const stylesVagas = StyleSheet.create({
+//VAGAS STYLES
+const stylesVagas = StyleSheet.create({ 
   item: {
-    padding: 7,
+    width: width * 0.9,
+    padding: 12,
     paddingBottom: 14,
     marginVertical: 8,
     backgroundColor: colors.cinza,
@@ -289,16 +326,16 @@ const stylesVagas = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
-    alignItems: "center"
+    alignItems: 'center'
   },
   title: {
-    fontSize: 27,
+    fontSize: 30,
     fontWeight: 'bold',
-    color: colors.tituloAmarelo,
+    color: colors.tituloBranco,
   },
   subTitle: {
     fontSize: 21,
-    marginBottom: 5,
+    marginBottom: 10,
     color: colors.tituloAmarelo,
   },
   text: {
@@ -306,12 +343,22 @@ const stylesVagas = StyleSheet.create({
     marginBottom: 2,
     color: colors.tituloBranco,
   },
+  box_mode: {
+    width: '90%',
+    minHeight: 28,
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+  },
+  mode: {
+    fontSize: 18,
+    color: colors.tituloBranco,
+  },
 
   buttonCandidatar: {
     backgroundColor: colors.amarelo2,
     padding: 10,
     borderRadius: 10,
-    marginTop: 10,
+    marginTop: 20,
     width: '70%',
     alignItems: 'center',
   },

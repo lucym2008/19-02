@@ -39,11 +39,13 @@ export const FormEmpresa = () => {
        const tipo_conta = 'Empresa';
        const data = {
           uid: uid,
-          email,
-          displayName: name,
+          gmail: email,
+          name_conta: name,
           password,
-          tipo_conta,
           descricao,
+          cnpj,
+          setor,
+          tipo_conta,
           createdAt: new Date(),
        };
        const pessoasSubCollectionRef = doc(db, 'Contas', uid);
@@ -85,6 +87,24 @@ export const FormEmpresa = () => {
             <TextArea 
               value={descricao}
               onChangeText={setDescricao}
+              placeholder='...'
+              placeholderTextColor={colors.amarelo2}
+            />
+          </View>
+          <View style={styles.containerMed_AreaInput}>
+            <Text style={styles.containerMed_AreaInput_text}>Digite seu cnpj:</Text>
+            <TextArea 
+              value={cnpj}
+              onChangeText={setCnpj}
+              placeholder='...'
+              placeholderTextColor={colors.amarelo2}
+            />
+          </View>          
+          <View style={styles.containerMed_AreaInput}>
+            <Text style={styles.containerMed_AreaInput_text}>Digite seu setor da empresa:</Text>
+            <TextArea 
+              value={setor}
+              onChangeText={setSetor}
               placeholder='...'
               placeholderTextColor={colors.amarelo2}
             />

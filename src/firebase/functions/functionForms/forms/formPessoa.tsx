@@ -38,10 +38,9 @@ export const FormPessoa = () => {
       const uid = userCredential.user.uid;
       const data = {
         uid: uid,
-        email,
+        gmail: email,
         password,
-        displayName: name,
-        descricao,
+        name_conta: name,
         tipo_conta: tipo_conta,
         createdAt: new Date(),
       };

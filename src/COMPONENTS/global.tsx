@@ -10,6 +10,7 @@ export const colors = {
     texto: "#ffffff",
     textoCinza: "#666",
     cinza: "#343434",
+    cinza2: '#999999'
     // Adicione outras cores que precisar
   };
   

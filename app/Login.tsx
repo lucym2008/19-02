@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { Text, View, StyleSheet, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useRouter, Link } from 'expo-router';
 import { TxtInput } from '../src/COMPONENTS/objects';
 import { Botão } from '../src/COMPONENTS/objects';
 import { handleRecovery, onLoginPress } from '@/src/firebase/functions/functionsUser/Login';
 import { colors } from '@/src/COMPONENTS/global';
+import { width } from './(tabs)/configurações/Perfil';
+import { auth } from '@/src/firebase/config';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { handleRecuperarSenha } from '../src/firebase/functions/functionsUser/page';
 
 export default function Login() {
   const router = useRouter(); // Rotas
@@ -17,38 +21,59 @@ export default function Login() {
     await onLoginPress(ValuesLogin);
   };
 
-  const handleRecoveryPress = async () => {
-    const valueRecovery = { email };
-    await handleRecovery(valueRecovery);
-  };
+  const RecuperarSenha = () => {
+    const [email, setEmail] = useState('');
+    const [loading, setLoading] = useState(false);
+  
+    const onSubmit = async () => {
+      if (!email) {
+        alert('Por favor, insira seu email.');
+        return;
+      }
+  
+      setLoading(true);
+      try {
+        await handleRecuperarSenha(email);
+        // Opcional: redirecionar para página de login
+      } catch (error) {
+        console.error('Erro:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  }
 
   return (
     <View style={Style.container}>
-      <View style={Style.cardTop}></View>
+      <View style={Style.cardTop}>
+          <Text style={Style.cardTop_Title}>Go 2 Work</Text>
+          <Text style={Style.cardTop_subTitle}>Volte a para encontrar novos interreses.</Text>
+      </View>
+
       <View style={Style.cardBottom}>
-        <Text style={Style.Title}>Tela de Login</Text>
-        <Text style={Style.text}>Digite seu email:</Text>
+        <Text style={Style.cardBottom_text}>Digite seu email:</Text>
         <TxtInput 
           placeholder="Email"
           value={email}
+          placeholderTextColor={colors.tituloBranco}
           onChangeText={setEmail}
-          style={{color: "black"}}
         />
-        <Text style={Style.text}>Digite sua senha:</Text>
+        <Text style={Style.cardBottom_text}>Digite sua senha:</Text>
         <TxtInput
           placeholder="Senha"
+          placeholderTextColor={colors.tituloBranco}
           secureTextEntry
           value={password}
           onChangeText={setPassword}
         />
-        <Botão activeOpacity={0.8} onPress={handleRecoveryPress}>
-          <Text style={{ fontSize: 18 }}>Recuperar senha</Text>
-        </Botão>
+        <TouchableOpacity onPress={() => RecuperarSenha}>
+           <Text style={Style.cardBottom_recovery}>Deseja recuperar sua senha?</Text>
+        </TouchableOpacity>
         {isLoading ? (
           <ActivityIndicator size="large" color={colors.amarelo1} />
         ) : (
           <Botão activeOpacity={0.8} onPress={handleLogin} >
-            <Text style={{ fontSize: 18 }}>Entrar</Text>
+            <Text style={{ fontSize: 18, color: colors.tituloBranco }}>Entrar</Text>
           </Botão>
         )}
         <Text style={Style.textBottom}>
@@ -69,31 +94,46 @@ const Style = StyleSheet.create({
     backgroundColor: "#242424",
   },
   cardTop: {
-    height: '30%',
+    height: '24%',
+    width: width * 1,
+    alignItems: 'center',
+    justifyContent: 'flex-end'
   },
-  cardBottom: {
-    height: '70%',
-    width: '100%',
-    backgroundColor: "white",
-    alignItems: "center",
-    padding: 30,
+  cardTop_Title: {
+    fontSize: 50,
+    color: colors.amarelo2,
+    fontWeight: 'bold',
+    marginBottom: 10,
   },
-  Title: {
-    fontSize: 30,
-    color: colors.fundo,
-    fontWeight: '500',
+  cardTop_subTitle: {
+    fontSize: 17,
+    color: colors.tituloBranco,
     marginBottom: 20,
   },
-  text: {
+  cardBottom: {
+    minHeight: '65%',
+    width: width * 1,
+    //backgroundColor: "white",
+    alignItems: "center",
+    padding: 30,
+    marginTop: 20,
+  },
+  cardBottom_text: {
     fontSize: 18,
     marginBottom: 10,
-    marginTop: 10,
-    color: colors.fundo,
+    marginTop: 20,
+    color: colors.tituloBranco,
+  },
+  cardBottom_recovery: {
+    fontSize: 18,
+    marginBottom: 35,
+    marginTop: 35,
+    color: colors.tituloBranco,
   },
   textBottom: {
     fontSize: 18,
-    top: 100,
-    color: colors.fundo,
+    top: 80,
+    color: colors.tituloBranco,
   },
   links: {
     color: colors.amarelo1,

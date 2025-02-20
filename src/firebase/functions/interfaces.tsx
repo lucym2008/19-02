@@ -5,23 +5,37 @@ import { doc, getDoc } from "firebase/firestore";
 export interface Users {
     id?: string,
     uid: string,
-    name: string,
-    email: string,
+    gmail: string,
+    password: string,
+    name_conta: string,
     tipo_conta: string,
-    descricao: string
+}
+export interface Empresas {
+    id?: string,
+    uid: string,
+    gmail: string,
+    name_conta: string,
+    password: string,
+    setor: string,
+    descricao: string,
+    cnpj: number,
+    tipo_conta: string,
 }
 
-export interface Vagas{     //SERVE PARA PASSAR OS PARAMETROS DE CADA ITEM PARA A FLAT-LIST
+export interface Vagas {
     vaga_id: string,
-    vaga_name: string,
+    name_vaga: string,
+    uid_criadorVaga: string,
+    candidato_id: string,
     salario: number,
     gmail: string,
     empresa: string,
     modalidades: string,
     localizacao: string,
-    criadorId: string,
+    descricao: string,
+    setor: string,
     createdAt: Date,
-}; 
+};
 
 export interface Freelancer {
     name: string;
@@ -96,7 +110,7 @@ export const verification = () => {
         isAuthenticated: true,
         uid: user.uid,
         email: user.email,
-        name: user.displayName,
+        name_conta: user.name_conta,
     };
 }
 

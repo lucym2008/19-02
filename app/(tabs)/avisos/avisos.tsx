@@ -20,7 +20,7 @@ const AvissosScreen = () => {
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const novasCandidaturas = snapshot.docs.map(doc => ({
-        id: doc.id,
+        id_candidatura: doc.id,
         ...doc.data()
       })) as CandidaturaVaga[];
       
@@ -56,7 +56,7 @@ const AvissosScreen = () => {
         <FlatList
           data={candidaturas}
           renderItem={renderCandidatura}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id_candidatura}
         />
       )}
     </View>

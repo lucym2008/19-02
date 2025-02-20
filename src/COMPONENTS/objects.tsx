@@ -7,9 +7,9 @@ export function Botão({ ...rest }: TouchableOpacityProps) {
   return (
     <TouchableOpacity
       style={{
-        width: width * 0.9,
+        width: '100%',
         height: 60,
-        backgroundColor: colors.amarelo1,
+        backgroundColor: colors.amarelo2,
         borderRadius: 5,
         justifyContent: "center",
         alignItems: "center",

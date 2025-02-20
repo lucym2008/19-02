@@ -1,23 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, ScrollView, Alert } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { AntDesign, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { colors } from '@/src/COMPONENTS/global';
-import { Users, Vagas, width, height, verification } from '@/src/firebase/functions/interfaces';
+import { Users, Vagas, width, height, verification, Empresas } from '@/src/firebase/functions/interfaces';
 import { db } from '@/src/firebase/config';
 import { collection, getDocs, query, where, doc, deleteDoc } from 'firebase/firestore';
 import { handleRecovery } from '@/src/firebase/functions/functionsUser/Login';
+import { useRouter } from 'expo-router';
 
 const Account = () => {
   const [usersData, setUsersData] = useState<Users[]>([]);
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [userVagasList, setUserVagasList] = useState<Vagas[]>([]);
   const [filteredVagas, setFilteredVagas] = useState<Vagas[]>([]);
   const [filteredUsersData, setFilteredUsersData] = useState<Users[]>([]);
+  const [tipoConta, setTipoConta] = useState<string | null>(null);
 
   useEffect(() => {
     userVagas();
     dados_usuario();
-    
   }, []);
 
   async function dados_usuario() {
@@ -30,7 +32,7 @@ const Account = () => {
     try {
       const q = query(
         collection(db, "Contas"),
-        where("id", "==", userAuth.uid)
+        where("uid", "==", userAuth.uid)
       );
       const querySnapshot = await getDocs(q);      
       const usersDataArray = querySnapshot.docs.map(doc => ({
@@ -39,6 +41,10 @@ const Account = () => {
       }));
       setUsersData(usersDataArray);
       setFilteredUsersData(usersDataArray);
+
+      if (usersDataArray.length > 0) {
+        setTipoConta(usersDataArray[0].tipo_conta);
+      }
     } catch (error) {
       console.error("Error fetching user data:", error);
     } finally {
@@ -51,7 +57,7 @@ const Account = () => {
   try {
       const q = query(
           collection(db, "Vagas-trabalhos"),
-          where("criadorId", "==", userAuth.uid)
+          where("uid_criadorVaga", "==", userAuth.uid)
       );
       const querySnapshot = await getDocs(q);      
       const UsersVagasArray = querySnapshot.docs.map(doc => ({
@@ -76,16 +82,60 @@ const Account = () => {
     );
   };
 
-  const renderUserCard = ({ item }: { item: Users }) => (
+  const renderUserEmpresa = ({ item }: { item: Empresas }) => (
     <View style={styles.data}>
       <View style={styles.areaTop}>
-        <Text style={styles.title}>{item.name}</Text>
-        <Text style={styles.subTitle}>User - {item.tipo_conta}</Text>
+        <Text style={styles.title}>{item.name_conta}</Text>
+        <Text style={styles.subTitle}>{item.gmail}</Text>
       </View>
       <View style={styles.areaLow}>
-        <Text style={styles.sub}>Account Information:</Text>
-        <Text style={styles.text}>Contact: {item.email}</Text>
-        <Text style={styles.text}>Description: {item.descricao}</Text>
+        <View style={styles.areaLow_top}>
+        <View style={styles.areaLow_areaInfor}>
+            <Text style={styles.areaLow_top_text}>Informações da conta</Text>
+            <AntDesign name="rightcircle" size={30} color={colors.amarelo2} style={{left: 4}} onPress={() => router.replace('/(tabs)/configurações/Perfil')} />
+          </View>
+        </View>
+        <View style={styles.areaLow_low}>
+            <Text style={styles.areaLow_low_text}>Contato: </Text>
+            <Text style={styles.areaLow_low_text2}>{item.gmail}</Text>
+        </View>
+        <View style={styles.areaLow_low}>
+            <Text style={styles.areaLow_low_text}>Setor: </Text>
+            <Text style={styles.areaLow_low_text2}>{item.setor}</Text>
+        </View>
+        <View style={styles.areaLow_low}>
+            <Text style={styles.areaLow_low_text}>Cnpj: </Text>
+            <Text style={styles.areaLow_low_text2}>{item.cnpj}</Text>
+        </View>
+        <View style={styles.areaLow_low}>
+            <Text style={styles.areaLow_low_text}>Descrição: </Text>
+            <Text style={styles.areaLow_low_text2}>{item.cnpj}</Text>
+        </View>
+      </View>
+    </View>
+  );
+  const renderUserPessoa = ({ item }: { item: Users }) => (
+    <View style={styles.data}>
+      <View style={styles.areaTop}>
+        <Text style={styles.title}>{item.name_conta}</Text>
+        <Text style={styles.subTitle}>{item.gmail}</Text>
+      </View>
+      <View style={styles.areaLow}>
+        <View style={styles.areaLow_top}>
+          <View style={styles.areaLow_areaInfor}>
+            <Text style={styles.areaLow_top_text}>Informações da conta</Text>
+            <AntDesign name="rightcircle" size={30} color={colors.amarelo2} style={{left: 4}} onPress={() => router.replace('/(tabs)/configurações/Perfil')} />
+          </View>
+        </View>
+        <View style={styles.areaLow_low}>
+            <Text style={styles.areaLow_low_text}>Contato: </Text>
+            <Text style={styles.areaLow_low_text2}>{item.gmail}</Text>
+        </View>
+        <View style={styles.areaLow_low}>
+            <Text style={styles.areaLow_low_text}>Senha: </Text>
+            <Text style={styles.areaLow_low_text2}>{item.password}</Text>
+        </View>
+  
       </View>
     </View>
   );
@@ -94,7 +144,7 @@ const Account = () => {
     <View style={stylesVagas.item}>
       <View style={stylesVagas.item_areaTitle}>
         <MaterialCommunityIcons name="information-outline" size={30} color="white" />
-        <Text style={stylesVagas.title}>{item.name}</Text>
+        <Text style={stylesVagas.title}>{item.name_vaga}</Text>
         <MaterialCommunityIcons 
           name="delete" 
           size={30} 
@@ -118,30 +168,48 @@ const Account = () => {
           }} 
         /> 
       </View>
-      <Text style={stylesVagas.text}>Company: {item.empresa}</Text>
-      <Text style={stylesVagas.text}>Salary: R$ {item.salario}</Text>
+      <Text style={stylesVagas.text}>Salario: R$ {item.salario}</Text>
+      <Text style={stylesVagas.text}>Empresa: {item.empresa}</Text>
+      <Text style={stylesVagas.text}>Gmail: {item.gmail}</Text>
+      <Text style={stylesVagas.text}>Localização: {item.localizacao}</Text>
+      <Text style={stylesVagas.text}>Setor: {item.setor}</Text>
     </View>
   );
 
   return (
     <View style={styles.container}>
       <ScrollView>
-        <FlatList
-          data={filteredUsersData}
-          keyExtractor={(item) => item.uid}
-          renderItem={renderUserCard}
-          scrollEnabled={false}
-        />
-        
-        <Text style={styles.sectionTitle}>Your CLT Positions:</Text>
-        
-        <View style={stylesVagas.AreaVagasView}>
+      {tipoConta === 'Empresa' ? (
           <FlatList
-            data={filteredVagas}
+            data={filteredUsersData}
             keyExtractor={(item) => item.uid}
-            renderItem={renderVagaCard}
+            renderItem={renderUserEmpresa}
             scrollEnabled={false}
           />
+        ) : tipoConta === 'Pessoa' ? (
+          <FlatList
+            data={filteredUsersData}
+            keyExtractor={(item) => item.uid}
+            renderItem={renderUserPessoa}
+            scrollEnabled={false}
+        />
+        ) : (
+          <Text>Tipo de conta desconhecido</Text>
+        )}
+        
+        <Text style={styles.sectionTitle}>Suas vagas criadas: </Text>
+        
+        <View style={stylesVagas.AreaVagasView}>
+          {filteredVagas.length > 0 ? (
+            <FlatList
+              data={filteredVagas}
+              keyExtractor={(item) => item.uid}
+              renderItem={renderVagaCard}
+              scrollEnabled={false}
+            />
+          ) : (
+            <Text style={stylesVagas.emptyMessage}>You haven't posted any job positions yet.</Text>
+          )}
         </View>
       </ScrollView>
     </View>
@@ -165,42 +233,71 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   data: {
-    width: width,
-    minHeight: height * 0.15,
+    width: width * 1,
+    minHeight: height * 0.10,
     alignItems: 'center',
   },
   areaTop: {
     backgroundColor: colors.fundo2,
     width: '100%',
-    height: height * 0.18,
-    alignItems: 'center',
+    height: height * 0.23,
+    justifyContent: 'flex-end'
   },
   title: {
-    fontSize: 45,
+    fontSize: 40,
     fontWeight: 'bold',
-    color: colors.tituloAmarelo,
-    marginTop: 50,
+    color: colors.tituloBranco,
+    marginLeft: 30,
   },
   subTitle: {
     fontSize: 20,
-    color: colors.tituloAmarelo,
+    color: colors.cinza2,
+    marginLeft: 40,
+    marginBottom: 23,
   },
+
   areaLow: {
-    maxWidth: width * 0.9,
-    minHeight: height * 0.15,
+    width: '90%',
+    padding: 15,
+    maxHeight: 300,
+    backgroundColor: colors.fundo2,
+    borderRadius: 20,
+    marginTop: 20,
     alignItems: 'center',
   },
-  sub: {
-    fontSize: 22,
-    color: colors.tituloBranco,
-    marginTop: 13,
-    marginBottom: 10,
+  areaLow_top: {
+    width: '100%',
+    minHeight: 40,
+    //backgroundColor: 'blue',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
-  text: {
-    fontSize: 17,
-    fontWeight: 'bold',
+  areaLow_areaInfor: {
+    width: '93%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 5,
+  },
+  areaLow_top_text: {
+    fontSize: 28,
     color: colors.tituloBranco,
-    marginVertical: 3,
+  },
+
+  areaLow_low: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 4,
+    padding: 5,
+  },
+  areaLow_low_text: {
+    fontSize: 18,
+    color: colors.cinza2,
+  },
+  areaLow_low_text2: {
+    fontSize: 18,
+    color: colors.tituloAmarelo,
   },
 });
 
@@ -228,6 +325,7 @@ const stylesVagas = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginBottom: 10,
   },
   title: {
     fontSize: 24,
@@ -237,6 +335,13 @@ const stylesVagas = StyleSheet.create({
   text: {
     fontSize: 16,
     color: colors.tituloBranco,
+    marginBottom: 5,
+  },
+  emptyMessage: {
+    fontSize: 16,
+    color: colors.tituloBranco,
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 

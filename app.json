@@ -2,7 +2,7 @@
   "expo": {
     "name": "teste",
     "slug": "teste",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/images/img_G2W.png",
     "scheme": "myapp",
@@ -17,7 +17,7 @@
       "supportsTablet": true
     },
     "android": {
-      "versionCode": 2,
+      "versionCode": 3,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/img_G2W.png",
         "backgroundColor": "#24242"

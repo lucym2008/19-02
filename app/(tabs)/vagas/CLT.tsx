@@ -14,24 +14,31 @@ export default function CLT() {
   const router = useRouter();
   const [localizacao, setLocalizacao] = useState('');
   const [name, setName] = useState('');
-  const [empresa, setEmpresa] = useState(verification().name);
+  const [empresa, setEmpresa] = useState('');
   const [salario, setSalario] = useState('');
-  const [gmail, setGmail] = useState(verification().email);
+  const [descricao, setDescricao] = useState('');
+  const [gmail, setGmail] = useState('');
   const [selectedOption, setSelectedOption] = useState('');
+  const [setor, setSetor] = useState('');
   const [Loading, setLoading] = useState(false);
   
   async function handleAddVagaCLT() {
     try {
       setLoading(true);
       const newJob = {
-        vaga_id: '',
-        vaga_name: name,
+        
+        uid_criadorVaga: verification().uid,
+        name_vaga: name,
+        name_criadorVaga: verification().displayName,
+
         salario,
         gmail,
         empresa,
         modalidades: selectedOption,
         localizacao,
-        criadorId: verification().uid,
+        descricao,
+        setor,
+       
         createdAt: new Date(),
       };
       const docRef = await addDoc(collection(db, 'Vagas-trabalhos'), newJob);
@@ -100,6 +107,15 @@ export default function CLT() {
             />
           </View>
           <View style={styles.containerMed_AreaInput}>
+            <Text style={styles.containerMed_AreaInput_text}>Digite o genero da vaga::</Text>
+            <TxtInput
+              value={setor}
+              onChangeText={setSetor}
+              placeholder="..."
+              placeholderTextColor={colors.amarelo2}
+            />
+          </View>
+          <View style={styles.containerMed_AreaInput}>
             <Text style={styles.containerMed_AreaInput_text}>O modelo de trabalho:</Text>
             <Picker
               selectedValue={selectedOption}
@@ -113,9 +129,18 @@ export default function CLT() {
             </Picker>
           </View>
           <View style={styles.containerMed_AreaInput}>
-            <Text style={styles.containerMed_AreaInput_text}>Digite o E-mail correspondente:</Text>
+            <Text style={styles.containerMed_AreaInput_text}>O E-mail correspondente:</Text>
             <TxtInput
               onChangeText={setGmail}
+              placeholder="..."
+              placeholderTextColor={colors.amarelo2}
+            />
+          </View>
+          <View style={styles.containerMed_AreaInput}>
+            <Text style={styles.containerMed_AreaInput_text}>Digite uma descrição:</Text>
+            <TxtInput
+              value={descricao}
+              onChangeText={setDescricao}
               placeholder="..."
               placeholderTextColor={colors.amarelo2}
             />
