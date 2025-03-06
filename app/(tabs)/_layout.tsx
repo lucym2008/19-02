@@ -73,6 +73,25 @@ export default function Layout() {
                     ),
             }}
             />
+            <Stack.Screen 
+            name="config" 
+            options={{
+                headerShown: true,
+                headerStyle: {
+                    backgroundColor: colors.fundo,
+                },
+                headerTitle: "",
+                headerLeft: ({ canGoBack }) =>
+                    canGoBack && (
+                      <TouchableOpacity
+                        onPress={() => router.replace('/(tabs)/dashboard')}
+                        style={{ marginLeft: 10 }} // Espaçamento opcional
+                      >
+                        <Ionicons name="arrow-back" size={27} color={colors.tituloBranco} />
+                      </TouchableOpacity>
+                    ),
+            }}
+            />
         </Stack>
     )
 }

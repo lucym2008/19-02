@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, ActivityIndicator,
           Alert, TouchableOpacity, ScrollView, FlatList, 
-          Button,
           Modal
 } from 'react-native';
 import { collection, doc, getDocs, increment, limit, query, updateDoc, where } from 'firebase/firestore';

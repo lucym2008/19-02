@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, Alert, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors } from '@/src/COMPONENTS/global';
-import Colors from '@/constants/Colors';
 import { MaterialIcons } from '@expo/vector-icons';
 import { TxtInput } from '@/src/COMPONENTS/objects';
 import { BotãoInicio, BotãoRedondo } from '@/src/COMPONENTS/objects';
 import { auth } from '@/src/firebase/config';
 import { userData } from '@/src/firebase/functions/functionsUser/getDataUser';
+import { Users } from '@/src/firebase/functions/interfaces';
 
 export const { width, height } = Dimensions.get('window');
 
@@ -16,11 +16,11 @@ const Perfil = () => {
   const [usersData, setUsersData] = useState([]);
   const [changeText, setChangeText] = useState("");
   const [Loading, setLoading] = useState([]);
-  const [novaIdade, setNovaIdade] = useState(''); // Estado para armazenar o novo valor
   const router = useRouter()
   // Função para atualizar o campo "idade"
   const handleChangeText = async () => {
   };
+
   const logout = async () => {
     try {
       await auth.signOut();
@@ -50,7 +50,7 @@ const Perfil = () => {
         <Text style={styles.containerMed_title}>Configurações de perfil</Text>
           <View style={styles.containerMed_area} >
               <Text style={styles.containerMed_textConfig}>Nome: 
-                  <Text style={{color: colors.amarelo2}}> {usersData.displayName} </Text>
+                  <Text style={{color: colors.amarelo2}}> {usersData.name} </Text>
                   <MaterialIcons name="published-with-changes" size={24} color={colors.amarelo2} />
               </Text>
               <Text style={styles.containerMed_textConfig}>E-mail: 

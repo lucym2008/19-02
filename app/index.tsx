@@ -1,6 +1,6 @@
 // 'PAGINA INICIAL'
-import React, { useEffect, useRef, useState } from 'react';
-import { Text, View, StyleSheet, Animated, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Text, View, StyleSheet } from 'react-native';
 import { Link, useRouter } from 'expo-router'; // TENTANDO FAZER A NAVEGAÇÃO
 import { colors } from '../src/COMPONENTS/global';
 import { BotãoInicio } from '../src/COMPONENTS/objects';
@@ -8,7 +8,6 @@ import { Dimensions } from 'react-native';
 
 // DIMENSÕES DA TELA Q CONVERSAMOS
 const { width, height } = Dimensions.get('window');
-
 
 export default function index() {
   const router = useRouter();

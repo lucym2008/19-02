@@ -34,22 +34,37 @@ const VagasEmprego = () => {
     }
   }, [searchQuery, jobs]);
 
-  const renderItem = ({ item }: {item: Vagas}) => (
-    <View style={stylesVagas.item}>
-      <Text style={stylesVagas.title}>{item.name}</Text>
-      <Text style={stylesVagas.subTitle}> {item.empresa}</Text>
-      <Text style={stylesVagas.text}><Text style={{color: colors.amarelo2}}>Salário:</Text> R$ {item.salario}</Text>
-      <Text style={stylesVagas.text}><Text style={{color: colors.amarelo2}}>Modalidades:</Text> {item.modalidades}</Text>      
-      <Text style={stylesVagas.text}><Text style={{color: colors.amarelo2}}>Contato:</Text> {item.gmail}</Text>
-      <Text style={stylesVagas.text}><Text style={{color: colors.amarelo2}}>localização:</Text> {item.localizacao}</Text>
-      <TouchableOpacity
-        style={stylesVagas.buttonCandidatar}
-        onPress={() => handleCandidatura()}
-      >
-        <Text style={stylesVagas.buttonText}>Candidatar-se</Text>
-      </TouchableOpacity>
-    </View>
-  );
+  const renderItem = ({ item }: {item: Vagas}) => {
+    console.log('Item da lista:', item); // Debug para ver os dados que estão chegando
+    return (
+      <View style={stylesVagas.item}>
+        <Text style={stylesVagas.title}>{item.name_vaga}</Text>
+        <Text style={stylesVagas.subTitle}>{item.empresa}</Text>
+        <View style={stylesVagas.box_mode}>
+            <Text style={stylesVagas.mode}>Salario: R$</Text>
+            <Text style={stylesVagas.mode}>{item.salario}</Text>
+        </View>
+        <View style={stylesVagas.box_mode}>
+            <Text style={stylesVagas.mode}>Modalidades: R$</Text>
+            <Text style={stylesVagas.mode}> {item.modalidades}</Text>
+        </View>    
+        <View style={stylesVagas.box_mode}>
+            <Text style={stylesVagas.mode}>Contato:</Text>
+            <Text style={stylesVagas.mode}>{item.gmail}</Text>
+        </View>
+        <View style={stylesVagas.box_mode}>
+            <Text style={stylesVagas.mode}>Loclização:</Text>
+            <Text style={stylesVagas.mode}> {item.localizacao}</Text>
+        </View>   
+        <TouchableOpacity 
+          style={stylesVagas.buttonCandidatar}
+          onPress={() => handleCandidatura(item)}      
+        >
+          <Text style={stylesVagas.buttonText}>Candidatar-se</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -144,9 +159,11 @@ const styles = StyleSheet.create({
   },
 });
 
-const stylesVagas = StyleSheet.create({
+//VAGAS STYLES
+const stylesVagas = StyleSheet.create({ 
   item: {
-    padding: 7,
+    width: width * 0.9,
+    padding: 12,
     paddingBottom: 14,
     marginVertical: 8,
     backgroundColor: colors.cinza,
@@ -156,16 +173,16 @@ const stylesVagas = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
-    alignItems: "center"
+    alignItems: 'center'
   },
   title: {
-    fontSize: 27,
+    fontSize: 30,
     fontWeight: 'bold',
-    color: colors.tituloAmarelo,
+    color: colors.tituloBranco,
   },
   subTitle: {
     fontSize: 21,
-    marginBottom: 5,
+    marginBottom: 10,
     color: colors.tituloAmarelo,
   },
   text: {
@@ -173,12 +190,22 @@ const stylesVagas = StyleSheet.create({
     marginBottom: 2,
     color: colors.tituloBranco,
   },
+  box_mode: {
+    width: '90%',
+    minHeight: 28,
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+  },
+  mode: {
+    fontSize: 18,
+    color: colors.tituloBranco,
+  },
 
   buttonCandidatar: {
     backgroundColor: colors.amarelo2,
     padding: 10,
     borderRadius: 10,
-    marginTop: 10,
+    marginTop: 20,
     width: '70%',
     alignItems: 'center',
   },

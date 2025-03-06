@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import { CandidaturaVaga, handleCandidaturaError, height, Vagas, verification, width } from '@/src/firebase/functions/interfaces';
 import { Feather, FontAwesome6, MaterialIcons } from '@expo/vector-icons';
 import { getVagas } from '@/src/firebase/functions/fuctionsVagas/getVagas';
-import { auth, db } from '@/src/firebase/config';
+import { db } from '@/src/firebase/config';
 import { addDoc, collection } from 'firebase/firestore';
 
 const Index = () => {
@@ -28,39 +28,6 @@ const Index = () => {
     getVagas(DadosJobs);
   }, []);
   
-  const handleCandidatura = async (vaga: Vagas) => {
-    const userAuth = verification();
-    try {
-      if (!userAuth.uid || !userAuth.name_conta) {
-        throw new Error('Usuário não está autenticado corretamente');
-      }
-
-      if (!vaga.vaga_id || !vaga.uid_criadorVaga || !vaga.name_vaga) {
-        console.error('Dados da vaga:', vaga);
-        throw new Error('Dados da vaga incompletos');
-      }
-
-      const candidaturaRef = collection(db, 'candidaturas');
-      const novaCandidatura: CandidaturaVaga = {
-        id_candidatura: '', // Será gerado pelo Firestore
-        vaga_id: vaga.vaga_id,
-        vaga_name: vaga.name_vaga,
-        candidatoId: userAuth.uid,
-        candidato_name: userAuth.name_conta,
-        criadorId: vaga.uid_criadorVaga,
-        dataCandidatura: new Date().toISOString(),
-        status: 'pendente'
-      };
-
-      await addDoc(candidaturaRef, novaCandidatura);
-      alert('Candidatura realizada com sucesso!');
-    } catch (error) {
-      const handledError = handleCandidaturaError(error);
-      console.error('Erro na candidatura:', error);
-      alert(error instanceof Error ? error.message : 'Erro ao realizar candidatura');
-    }
-  };
-
   const renderItem = ({ item }: {item: Vagas}) => {
     console.log('Item da lista:', item); // Debug para ver os dados que estão chegando
     return (
@@ -85,7 +52,7 @@ const Index = () => {
         </View>   
         <TouchableOpacity 
           style={stylesVagas.buttonCandidatar}
-          onPress={() => handleCandidatura(item)}      
+          // onPress={() => handleCandidatura(item)}      
         >
           <Text style={stylesVagas.buttonText}>Candidatar-se</Text>
         </TouchableOpacity>
@@ -203,7 +170,6 @@ const styles = StyleSheet.create({
   scrollArea: {
     flex: 1,
   },
-
   //TOP AREA
   AreaTop:{
     width: width * 1,

@@ -23,15 +23,7 @@ export default function Layout() {
       }}
     >
       <Tabs.Screen
-        name="VagasEmprego"
-        options={{headerShown: false}}
-      />
-      <Tabs.Screen
-        name="Perfil"
-        options={{headerShown: false}}
-      />
-      <Tabs.Screen
-        name="criarVaga"
+        name="perfil"
         options={{headerShown: false}}
       />
     </Tabs>
